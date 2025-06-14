@@ -58,6 +58,8 @@ async function alteraHorarioReuniao(consulta, numeroTel, texto) {
                 consulta.etapaFluxo = 'INICIAL';
                 consulta.reuniao = null;
                 await reuniao_encontrada.save()
+
+                console.log('depois de salvar', reuniao_encontrada);
                 await consulta.save();
                 await enviaNotificacaoAlteracaoHorario(reuniao_encontrada, 'usuario_alterou_horario_reuniao');
                 return true;
@@ -85,17 +87,20 @@ async function updateHorarioReuniaoMongoDB(resultado, numeroTel, consulta) {
         // horarioBrasil = horarioBrasil.subtract(3, 'hour').toDate();
 
         let horarioBrasil = agoraBrasilia();
-
+        console.log('horario Brasil', horarioBrasil);
+        console.log(resultado);
         let dates = {
-            dataHoraInicio: converteParaHorarioUTC(resultado.dataHoraInicio),
-            novoHorarioInicio: converteParaHorarioUTC(resultado.novoHorarioInicio),
-            novoHorarioFim: converteParaHorarioUTC(resultado.novoHorarioFim)
+            dataHoraInicio: dayjs(resultado.dataHoraInicio).toDate(),
+            novoHorarioInicio: dayjs(resultado.novoHorarioInicio).toDate(),
+            novoHorarioFim: dayjs(resultado.novoHorarioFim).toDate(),
         }
 
+        console.log(dates);
+        
         const reuniao_encontrada = await reuniao.findOne({
             dataHoraInicio: {
-                $gte: dayjs(dates.dataHoraInicio).startOf('minute').toDate(),
-                $lte: dayjs(dates.dataHoraInicio).endOf('minute').toDate()
+                $gte: dayjs(dates.dataHoraInicio).startOf('minute'),
+                $lte: dayjs(dates.dataHoraInicio).endOf('minute')
             },
             status: 'Agendada',
             organizador: consulta.pessoa._id
@@ -111,7 +116,7 @@ async function updateHorarioReuniaoMongoDB(resultado, numeroTel, consulta) {
         const duracaoReuniao = dayjs.utc(reuniao_encontrada.dataHoraFim).diff(dayjs.utc(reuniao_encontrada.dataHoraInicio), 'minute');
 
         if (resultado.novoHorarioFim && resultado.novoHorarioFim.trim() !== '') {
-            dates.novoHorarioFim = new Date(converteParaHorarioUTC(resultado.novoHorarioFim));
+            dates.novoHorarioFim = new Date(dayjs(resultado.novoHorarioFim).toDate());
         } else {
             dates.novoHorarioFim = new Date(dates.novoHorarioInicio.getTime() + duracaoReuniao * 60000); // Adiciona a duração da reunião ao novo horário de início
         }
@@ -140,6 +145,8 @@ async function updateHorarioReuniaoMongoDB(resultado, numeroTel, consulta) {
         if (dates.novoHorarioFim) {
             reuniao_encontrada.dataHoraFim = dates.novoHorarioFim
         }
+
+        console.log('antes de salvar ', reuniao_encontrada);
 
         if (dates.novoHorarioInicio.getTime() === reuniao_encontrada.dataHoraFim.getTime()) {
             await axios(textMessage(numeroTel, '❗O horário de início não pode ser igual ao horário de fim da reunião. Por gentileza informe um horário de início e de fim para a reunião;'));
@@ -183,8 +190,9 @@ async function updateHorarioReuniaoMongoDB(resultado, numeroTel, consulta) {
  * @returns {Object} - Objeto com as informações extraídas do texto
  */
 async function promptAlteracaoHorario(texto) {
-    let horarioBrasil = dayjs().tz("America/Sao_Paulo").toDate();
+    // let horarioBrasil = dayjs().tz("America/Sao_Paulo");
     // horarioBrasil = horarioBrasil.subtract(3, 'hour').toDate();
+    let horarioBrasil = agoraBrasilia();
 
     let responseFormat = zodResponseFormat(Evento, 'evento');
     const reuniao_alterada = await openai.beta.chat.completions.parse({
@@ -192,7 +200,7 @@ async function promptAlteracaoHorario(texto) {
         messages: [
             {
                 role: 'system', content: 'Extraia as informações do evento, identifique horários e verifique se o usuário deseja alterar o horário de uma reunião, você deve compreender linguagens como hoje, amanhã, semana que vem e outras variações. Não produza informações, ' +
-                    'hoje é dia ' + horarioBrasil + 'Importante: "Considere que todas as referências de data e hora feitas pelo usuário estão no fuso horário de Brasília (GMT-3)."' +
+                    'hoje é dia ' + horarioBrasil + '.'  +
                     ' dataHoraInicio, é uma informação obrigatória, pois se refere ao horário da reunião que está sendo buscada.' +
                     ' novoHorarioInicio é uma informação obrigatório, pois se refere ao novo horário de início para a reunião.' +
                     ' novoHorarioFim é uma informação opcional, se refere ao novo horário de fim para a reunião.' +
@@ -203,6 +211,10 @@ async function promptAlteracaoHorario(texto) {
         ],
         response_format: responseFormat,
     });
+    console.log(horarioBrasil);
+
+    console.log(texto);
+    
     let resultado = reuniao_alterada.choices[0].message.parsed;
 
     return resultado;
