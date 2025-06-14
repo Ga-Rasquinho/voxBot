@@ -1,12 +1,4 @@
 # Projeto final para o curso Análise e Desenvolvimento de Sistemas - IFSP
-<table align="center">
-  <tr>
-    <td align="center" style="border: none;">
-      <img src="docs\VotboxLIGHT.png" width="300" height="310" alt="Voxbot Logo"/>
-    </td>
-  </tr>
-</table>
-
 
 ### Arquitetura
 <img src='docs\arquitetura-voxbot.jpg'/>
