@@ -11,6 +11,6 @@
 </p>
 
 ## Contribuidores
-<a href="https://github.com/othneildrew/Best-README-Template/graphs/contributors">
+<a href="https://github.com/Luizfernando5212/voxBot/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Luizfernando5212/voxBot" alt="contrib.rocks image" />
 </a>
