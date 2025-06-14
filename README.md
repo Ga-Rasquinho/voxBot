@@ -1,5 +1,12 @@
 # Projeto final para o curso Análise e Desenvolvimento de Sistemas - IFSP
-### Descrição do Projeto
+<p style="text-align:center">
+<img src="docs\VotboxLIGHT.png" width='300' height='310'/>
+</p>
+
+### Arquitetura
+<img src='docs\arquitetura-voxbot.jpg'/>
+
+## Descrição do Projeto
 <p>Chatbot inteligente com foco em agendamentos de reuniões via Whatsapp, integrado a modelos de LLM treinados pela OpenAI.</p>
 
 ## Tecnologias Utilizadas
