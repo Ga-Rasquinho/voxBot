@@ -1,7 +1,7 @@
 # Projeto final para o curso Análise e Desenvolvimento de Sistemas - IFSP
-<p style="text-align:center">
-<img src="docs\VotboxLIGHT.png" width='300' height='310'/>
-</p>
+<div style="text-align:center">
+<img src="docs\VotboxLIGHT.png" width='300' height='310' alt="Voxbot logo/>
+</div>
 
 ### Arquitetura
 <img src='docs\arquitetura-voxbot.jpg'/>
